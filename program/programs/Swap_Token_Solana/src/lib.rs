@@ -15,7 +15,7 @@ declare_id!("Cqvte55GwzjWgRiwjvNVRD5kPBUpkV3YFuGwQmPAcd6z"); //local
 #[program]
 pub mod swap_token_solana {
     use super::*;
-    const ESCROW_PDA_SEED: &[u8] = b"testSwap";
+    // const ESCROW_PDA_SEED: &[u8] = b"testSwap";
 
     pub fn mint_token(ctx: Context<MintToken>, amount_in: u64) -> Result<()> {
 
@@ -25,19 +25,18 @@ pub mod swap_token_solana {
             to: ctx.accounts.token_account.to_account_info(),
             authority: ctx.accounts.authority.to_account_info(),
         };
-        
+
         let cpi_program = ctx.accounts.token_program.to_account_info();
         // Create the CpiContext we need for the request
         let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
 
         // Execute anchor's helper function to mint tokens
         token::mint_to(cpi_ctx, amount_in)?;
-        
+
         Ok(())
     }
 
     pub fn transfer_token(ctx: Context<TransferToken>, amount_in: u64) -> ProgramResult {
-        
         if !ctx.accounts.from_authority.is_signer {
             return Err(ProgramError::MissingRequiredSignature);
         }
@@ -47,14 +46,14 @@ pub mod swap_token_solana {
             to: ctx.accounts.to.to_account_info(),
             authority: ctx.accounts.from_authority.to_account_info(),
         };
-         
+
         let cpi_program = ctx.accounts.token_program.to_account_info();
         // Create the Context for our Transfer request
         let cpi_ctx = CpiContext::new(cpi_program, transfer_instruction);
 
         // Execute anchor's helper function to transfer tokens
         anchor_spl::token::transfer(cpi_ctx, amount_in)?;
- 
+
         Ok(())
     }
 
@@ -64,7 +63,7 @@ pub mod swap_token_solana {
             delegate: ctx.accounts.delegate.to_account_info(),
             authority: ctx.accounts.authority.to_account_info(),
         };
-         
+
         let cpi_program = ctx.accounts.token_program.to_account_info();
         let cpi_ctx = CpiContext::new(cpi_program, approve_instruction);
 
@@ -75,11 +74,11 @@ pub mod swap_token_solana {
     pub fn swap_token(ctx: Context<PoolToken>, amount_in: u64) -> Result<()>{
         let fixed_rate = 80;
         let amount_out = amount_in*fixed_rate/100;
-        
+
         token::transfer(ctx.accounts.transfer_from_token_user(), amount_in)?;
         token::transfer(ctx.accounts.transfer_from_token_pool(), amount_out)?;
         Ok(())
-    }    
+    }
 
 }
 
@@ -120,28 +119,28 @@ pub struct TransferToken<'info> {
     /// CHECK: The associated token account that we are transferring the token to
     #[account(mut)]
     pub to: AccountInfo<'info>,
-    // the authority of the from account 
+    // the authority of the from account
     pub from_authority: Signer<'info>,
 }
 
 #[derive(Accounts)]
 pub struct PoolToken<'info> {
-    /// CHECK: The associated token account that we are transferring the token 
+    /// CHECK: The associated token account that we are transferring the token
     pub token_program: AccountInfo<'info>,
-    /// CHECK: The associated token account that we are transferring the token 
+    /// CHECK: The associated token account that we are transferring the token
     #[account(mut)]
     pub ata_pool_token_a: AccountInfo<'info>,
-    /// CHECK: The associated token account that we are transferring the token 
+    /// CHECK: The associated token account that we are transferring the token
     #[account(mut)]
     pub ata_pool_token_b: AccountInfo<'info>,
-    /// CHECK: The associated token account that we are transferring the token 
+    /// CHECK: The associated token account that we are transferring the token
     #[account(mut)]
     pub ata_source_user_a: AccountInfo<'info>,
-    /// CHECK: The associated token account that we are transferring the token 
+    /// CHECK: The associated token account that we are transferring the token
     #[account(mut)]
     pub ata_source_user_b: AccountInfo<'info>,
-    // the authority of the from account 
-    pub from_authority: Signer<'info>, 
+    // the authority of the from account
+    pub from_authority: Signer<'info>,
     pub authority: Signer<'info>,
 }
 

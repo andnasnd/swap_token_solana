@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@solana/web3.js": "^1.59.1",
+    "ts-mocha": "^10.0.0"
+  }
+}

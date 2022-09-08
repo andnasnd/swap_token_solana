@@ -48,7 +48,7 @@ describe("Test Mint Token Solana", () => {
 
     console.log("MINT_SIZE: " + MINT_SIZE)
 
-    // Get the ATA for a token and the account that we want to own the ATA (but it might not existing on the SOL network yet)
+    // Get the ATA for a token and the account that we want to own the ATA (it might not exist on the SOL network yet)
     associatedTokenAccountTokenA = await getAssociatedTokenAddress(
       addTokenA.publicKey,
       ownerKey
@@ -67,7 +67,7 @@ describe("Test Mint Token Solana", () => {
         programId: TOKEN_PROGRAM_DEV,
         lamports,
       }),
-      // Fire a transaction to create our mint account that is controlled by our anchor wallet
+      // Txn to create our mint account that is controlled by our anchor wallet
       createInitializeMintInstruction(
         addTokenA.publicKey, 0, ownerKey, ownerKey
       ),
@@ -126,7 +126,7 @@ describe("Test Mint Token Solana", () => {
     // Get anchor's wallet's public key
     const myWallet = anchor.AnchorProvider.env().wallet.publicKey;
 
-    // Wallet that will receive the token 
+    // Wallet that will receive the token
     const toWallet: anchor.web3.Keypair = anchor.web3.Keypair.generate();
 
     // The ATA for a token on the to wallet (but might not exist yet)
@@ -157,7 +157,7 @@ describe("Test Mint Token Solana", () => {
       )
     ), []);
 
-    // Executes our transfer smart contract 
+    // Executes our transfer smart contract
     let accountObject = {
       tokenProgram: TOKEN_PROGRAM_DEV,
       from: associatedTokenAccountTokenA,
@@ -205,6 +205,7 @@ describe("Test Mint Token Solana", () => {
 
     let balancePool = await program.provider.connection.getBalance(poolWallet.publicKey)
     console.log("balancePool: " + balancePool)
+    console.log("\n");
 
     //Create ATA token pool A
     let tokenATAPoolTokenA = await createAssociatedTokenAccountInstr(myWallet, poolWallet, addTokenA)
@@ -217,9 +218,12 @@ describe("Test Mint Token Solana", () => {
       to: tokenATAPoolTokenA,
     }).rpc();
 
-    const _bf_minted = (await program.provider.connection.getParsedAccountInfo(tokenATAPoolTokenA)).value.data;
-    console.log("Before Pool Token A: " + _bf_minted['parsed']['info']['tokenAmount']['amount']);
-
+    console.log("Before transfer from pool A to otherUser:");
+    const _before_minted_pool_a = (await program.provider.connection.getParsedAccountInfo(tokenATAPoolTokenA)).value.data;
+    console.log("Pool Token A: " + _before_minted_pool_a['parsed']['info']['tokenAmount']['amount']);
+    const _before_minted_pool_b = (await program.provider.connection.getParsedAccountInfo(tokenATAPoolTokenB)).value.data;
+    console.log("Pool Token B: " + _before_minted_pool_b['parsed']['info']['tokenAmount']['amount']);
+    console.log("\n");
 
     await program.methods.transferToken(new BN(1000)).accounts({
       tokenProgram: TOKEN_PROGRAM_DEV,
@@ -240,7 +244,7 @@ describe("Test Mint Token Solana", () => {
       to: otherUserATATokenA,
     }).rpc();
 
-    console.log("After transfer from pool A to otherUser")
+    console.log("After transfer from pool A to otherUser:");
     const minted = (await program.provider.connection.getParsedAccountInfo(tokenATAPoolTokenA)).value.data;
     console.log("Pool Token A: " + minted['parsed']['info']['tokenAmount']['amount']);
     const minted2 = (await program.provider.connection.getParsedAccountInfo(tokenATAPoolTokenB)).value.data;
@@ -249,6 +253,7 @@ describe("Test Mint Token Solana", () => {
     console.log("Balance Token A of otherWallet: " + minted3['parsed']['info']['tokenAmount']['amount']);
     const minted4 = (await program.provider.connection.getParsedAccountInfo(otherUserATATokenB)).value.data;
     console.log("Balance Token B of otherWallet: " + minted4['parsed']['info']['tokenAmount']['amount']);
+    console.log("\n");
 
     const amountIn = 10;
     const fixedRate = 80 / 100;
@@ -270,7 +275,10 @@ describe("Test Mint Token Solana", () => {
     const rsOtherWalletTokenB = (await program.provider.connection.getParsedAccountInfo(otherUserATATokenB)).value.data;
     let amountOtherWalletTokenB = rsOtherWalletTokenB['parsed']['info']['tokenAmount']['amount'];
     console.log("otherUserToken Token B: " + amountOtherWalletTokenB);
-    
+    const afterPoolA = (await program.provider.connection.getParsedAccountInfo(tokenATAPoolTokenA)).value.data;
+    console.log("Pool Token A: " + afterPoolA['parsed']['info']['tokenAmount']['amount']);
+    const afterPoolB = (await program.provider.connection.getParsedAccountInfo(tokenATAPoolTokenB)).value.data;
+    console.log("Pool Token B: " + afterPoolB['parsed']['info']['tokenAmount']['amount']);
     assert.equal(amountOtherWalletTokenB, amountIn * fixedRate);
   })
 
