@@ -39,7 +39,7 @@ describe("Test Mint Token Solana", () => {
     // Get anchor's wallet's public key
     const owner = anchor.AnchorProvider.env().wallet;
     const ownerKey = owner.publicKey;
-    console.log("Onwer public key:" + ownerKey)
+    console.log("Owner public key:" + ownerKey)
 
     // Get the amount of SOL needed to pay rent for our Token Mint
     lamports = await program.provider.connection.getMinimumBalanceForRentExemption(
